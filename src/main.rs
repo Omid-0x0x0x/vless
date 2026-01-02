@@ -112,20 +112,36 @@ fn extract_transport(config: &str) -> TransportType {
     TransportType::Tcp
 }
 
+// Custom error type that implements Send + Sync
+#[derive(Debug)]
+struct FetchError(String);
+
+impl std::fmt::Display for FetchError {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", self.0)
+    }
+}
+
+impl std::error::Error for FetchError {}
+
 // Async download with timeout - runs all downloads concurrently
-async fn fetch_url(url: &str) -> Result<Vec<String>, Box<dyn std::error::Error>> {
+async fn fetch_url(url: &str) -> Result<Vec<String>, FetchError> {
     println!("📥 Downloading: {}", url);
     
     let client = reqwest::Client::builder()
         .timeout(std::time::Duration::from_secs(15))
-        .build()?;
+        .build()
+        .map_err(|e| FetchError(format!("Client build error: {}", e)))?;
     
     let response = client.get(url)
         .header("User-Agent", "Mozilla/5.0")
         .send()
-        .await?;
+        .await
+        .map_err(|e| FetchError(format!("Request error: {}", e)))?;
     
-    let body = response.text().await?;
+    let body = response.text().await
+        .map_err(|e| FetchError(format!("Body read error: {}", e)))?;
+    
     let decoded = decode_base64(&body);
     
     // Split and filter in one pass
@@ -135,7 +151,7 @@ async fn fetch_url(url: &str) -> Result<Vec<String>, Box<dyn std::error::Error>>
         .map(|s| s.to_string())
         .collect();
     
-    println!("   ✓ Found {} VLESS configs", configs.count());
+    println!("   ✓ Found {} VLESS configs", configs.len());
     Ok(configs)
 }
 
@@ -148,7 +164,11 @@ async fn fetch_all(urls: Vec<String>) -> Vec<String> {
     // Create futures for all downloads
     let tasks: Vec<_> = urls
         .into_iter()
-        .map(|url| task::spawn(fetch_url(url.clone())))
+        .map(|url| {
+            task::spawn(async move {
+                fetch_url(&url).await
+            })
+        })
         .collect();
     
     // Wait for all to complete
@@ -372,7 +392,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     split_configs(&unique_configs, 300, output_dir)?;
     
     // Update README
-    let repo_url = "https://github.com/Matt-Ranaei/vless";
+    let repo_url = "https://github.com/Matt-Ranaei/vless"; // Change this to your repo
     update_readme(output_dir, repo_url)?;
     
     println!("\n{}", "=".repeat(60));
