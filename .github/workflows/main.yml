@@ -26,7 +26,7 @@ jobs:
       - name: 🚀 Process configs
         run: |
           echo "Starting config processing..."
-          python3 simple_processor.py subscriptions.txt
+          python3 pingco.py subscriptions.txt
       
       - name: 💾 Commit and push
         run: |
