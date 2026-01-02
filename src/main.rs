@@ -8,13 +8,6 @@ use std::io::Write;
 use std::path::Path;
 use tokio::task;
 
-// Main config structure - zero-copy string slices where possible
-#[derive(Debug, Clone, Hash, Eq, PartialEq)]
-struct Config {
-    raw: String,
-    transport: TransportType,
-}
-
 // Transport types as enum for fastest matching
 #[derive(Debug, Clone, Copy, Hash, Eq, PartialEq)]
 enum TransportType {
@@ -26,7 +19,6 @@ enum TransportType {
 }
 
 impl TransportType {
-    // O(1) conversion to string
     fn as_str(&self) -> &'static str {
         match self {
             Self::WebSocket => "ws",
@@ -38,29 +30,37 @@ impl TransportType {
     }
 }
 
-// Fast base64 detection without regex - O(1) per character
+// Custom error type that is Send + Sync
+#[derive(Debug)]
+struct FetchError(String);
+
+impl std::fmt::Display for FetchError {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", self.0)
+    }
+}
+
+impl std::error::Error for FetchError {}
+
+// Fast base64 detection
 #[inline(always)]
 fn is_base64_char(c: u8) -> bool {
     matches!(c, b'A'..=b'Z' | b'a'..=b'z' | b'0'..=b'9' | b'+' | b'/' | b'=')
 }
 
-// Decode base64 iteratively - handles nested encoding
+// Decode base64 iteratively
 fn decode_base64(input: &str) -> String {
     let mut result = input.to_string();
     
-    // Try up to 5 layers of base64 encoding
     for _ in 0..5 {
-        // Quick check if it looks like base64
         if result.len() < 20 || result.starts_with("vless://") || result.starts_with("vmess://") {
             break;
         }
         
-        // Check if all characters are base64
         if !result.bytes().all(|b| is_base64_char(b) || b.is_ascii_whitespace()) {
             break;
         }
         
-        // Try to decode
         match base64::decode(result.trim()) {
             Ok(decoded) => {
                 match String::from_utf8(decoded) {
@@ -75,17 +75,14 @@ fn decode_base64(input: &str) -> String {
     result
 }
 
-// Extract transport type from config - O(1) time complexity
-// Uses fast substring search instead of regex
+// Extract transport type from config
 #[inline(always)]
 fn extract_transport(config: &str) -> TransportType {
-    // Find query string
     let query = match config.find('?') {
         Some(pos) => &config[pos..],
         None => return TransportType::Tcp,
     };
     
-    // Fast substring search for type parameter
     if let Some(type_pos) = query.find("type=") {
         let type_start = type_pos + 5;
         let type_end = query[type_start..]
@@ -95,7 +92,6 @@ fn extract_transport(config: &str) -> TransportType {
         
         let transport = &query[type_start..type_end];
         
-        // Match using first few characters for speed
         return match transport {
             t if t.starts_with("ws") => TransportType::WebSocket,
             t if t.starts_with("grpc") => TransportType::Grpc,
@@ -104,7 +100,6 @@ fn extract_transport(config: &str) -> TransportType {
         };
     }
     
-    // Check for TLS
     if query.contains("security=tls") {
         return TransportType::Tls;
     }
@@ -112,20 +107,8 @@ fn extract_transport(config: &str) -> TransportType {
     TransportType::Tcp
 }
 
-// Custom error type that implements Send + Sync
-#[derive(Debug)]
-struct FetchError(String);
-
-impl std::fmt::Display for FetchError {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{}", self.0)
-    }
-}
-
-impl std::error::Error for FetchError {}
-
-// Async download with timeout - runs all downloads concurrently
-async fn fetch_url(url: &str) -> Result<Vec<String>, FetchError> {
+// Async download with timeout
+async fn fetch_url(url: String) -> Result<Vec<String>, FetchError> {
     println!("📥 Downloading: {}", url);
     
     let client = reqwest::Client::builder()
@@ -133,7 +116,7 @@ async fn fetch_url(url: &str) -> Result<Vec<String>, FetchError> {
         .build()
         .map_err(|e| FetchError(format!("Client build error: {}", e)))?;
     
-    let response = client.get(url)
+    let response = client.get(&url)
         .header("User-Agent", "Mozilla/5.0")
         .send()
         .await
@@ -144,7 +127,6 @@ async fn fetch_url(url: &str) -> Result<Vec<String>, FetchError> {
     
     let decoded = decode_base64(&body);
     
-    // Split and filter in one pass
     let configs: Vec<String> = decoded
         .lines()
         .filter(|line| line.starts_with("vless://"))
@@ -155,23 +137,17 @@ async fn fetch_url(url: &str) -> Result<Vec<String>, FetchError> {
     Ok(configs)
 }
 
-// Download all URLs concurrently - maximum parallelism
+// Download all URLs concurrently
 async fn fetch_all(urls: Vec<String>) -> Vec<String> {
     println!("\n{}", "=".repeat(60));
     println!("📥 Fetching configs from all URLs...");
     println!("{}", "=".repeat(60));
     
-    // Create futures for all downloads
     let tasks: Vec<_> = urls
         .into_iter()
-        .map(|url| {
-            task::spawn(async move {
-                fetch_url(&url).await
-            })
-        })
+        .map(|url| task::spawn(fetch_url(url)))
         .collect();
     
-    // Wait for all to complete
     let mut all_configs = Vec::new();
     for task in tasks {
         if let Ok(Ok(configs)) = task.await {
@@ -183,13 +159,11 @@ async fn fetch_all(urls: Vec<String>) -> Vec<String> {
     all_configs
 }
 
-// Deduplicate using HashSet - O(1) average case per operation
+// Deduplicate using HashSet
 fn deduplicate(configs: Vec<String>) -> Vec<String> {
     println!("\n🔄 Removing duplicates...");
     
     let original_count = configs.len();
-    
-    // Use hashbrown for faster hashing
     let unique: std::collections::HashSet<_> = configs.into_iter().collect();
     let unique_vec: Vec<_> = unique.into_iter().collect();
     
@@ -204,7 +178,6 @@ fn deduplicate(configs: Vec<String>) -> Vec<String> {
 fn categorize(configs: Vec<String>) -> HashMap<TransportType, Vec<String>> {
     println!("\n📊 Categorizing by transport type...");
     
-    // Process in parallel using rayon
     let categorized: HashMap<TransportType, Vec<String>> = configs
         .par_iter()
         .fold(
@@ -227,7 +200,6 @@ fn categorize(configs: Vec<String>) -> HashMap<TransportType, Vec<String>> {
             }
         );
     
-    // Print statistics
     for (transport, configs) in &categorized {
         println!("   {}: {} configs", transport.as_str().to_uppercase(), configs.len());
     }
@@ -294,7 +266,6 @@ fn split_configs(configs: &[String], split_size: usize, output_dir: &Path) -> st
 fn update_readme(output_dir: &Path, repo_url: &str) -> std::io::Result<()> {
     println!("\n📝 Updating README.md...");
     
-    // Get all txt files
     let mut files: Vec<_> = fs::read_dir(output_dir)?
         .filter_map(Result::ok)
         .filter(|e| e.path().extension().and_then(|s| s.to_str()) == Some("txt"))
@@ -303,7 +274,6 @@ fn update_readme(output_dir: &Path, repo_url: &str) -> std::io::Result<()> {
     
     files.sort();
     
-    // Build README content
     let mut readme = format!(
         "# 🚀 VLESS Configs Repository\n\n\
          Auto-updated every 6 hours with fresh VLESS configurations.\n\n\
@@ -316,7 +286,6 @@ fn update_readme(output_dir: &Path, repo_url: &str) -> std::io::Result<()> {
         files.len()
     );
     
-    // Add raw links
     for file in &files {
         let raw_url = format!("{}/raw/main/configs/{}", repo_url, file);
         readme.push_str(&format!("- [{}]({})\n", file, raw_url));
@@ -340,7 +309,6 @@ fn update_readme(output_dir: &Path, repo_url: &str) -> std::io::Result<()> {
          *Auto-updated by GitHub Actions*\n"
     );
     
-    // Write README
     let readme_path = output_dir.parent().unwrap().join("README.md");
     fs::write(readme_path, readme)?;
     
@@ -350,7 +318,6 @@ fn update_readme(output_dir: &Path, repo_url: &str) -> std::io::Result<()> {
 
 #[tokio::main]
 async fn main() -> Result<(), Box<dyn std::error::Error>> {
-    // Parse arguments
     let args: Vec<String> = std::env::args().collect();
     if args.len() < 2 {
         eprintln!("Usage: {} <subscriptions_file>", args[0]);
@@ -359,7 +326,6 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     
     let subs_file = &args[1];
     
-    // Read subscription URLs
     let urls: Vec<String> = fs::read_to_string(subs_file)?
         .lines()
         .filter(|line| !line.trim().is_empty() && !line.starts_with('#'))
@@ -368,11 +334,9 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     
     println!("📋 Found {} subscription URLs", urls.len());
     
-    // Create output directory
     let output_dir = Path::new("configs");
     fs::create_dir_all(output_dir)?;
     
-    // Download all configs
     let all_configs = fetch_all(urls).await;
     
     if all_configs.is_empty() {
@@ -380,19 +344,14 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
         std::process::exit(1);
     }
     
-    // Deduplicate
     let unique_configs = deduplicate(all_configs);
-    
-    // Categorize
     let categories = categorize(unique_configs.clone());
     
-    // Save files
     save_all_configs(&unique_configs, output_dir)?;
     save_by_transport(&categories, output_dir)?;
     split_configs(&unique_configs, 300, output_dir)?;
     
-    // Update README
-    let repo_url = "https://github.com/Matt-Ranaei/vless"; // Change this to your repo
+    let repo_url = "https://github.com/Matt-Ranaei/vless";
     update_readme(output_dir, repo_url)?;
     
     println!("\n{}", "=".repeat(60));
