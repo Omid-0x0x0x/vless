@@ -1,60 +1,50 @@
-name: Auto Update VLESS Configs
+name: Auto Update VLESS Configs (Rust)
 
 on:
   schedule:
-    - cron: '0 */6 * * *'  # هر ۶ ساعت یکبار
-  workflow_dispatch:  # اجرای دستی
+    - cron: '0 */6 * * *'
+  workflow_dispatch:
 
 jobs:
   update:
     runs-on: ubuntu-latest
     
     steps:
-      # گام ۱: دانلود کد از repository
       - name: 📥 Checkout
         uses: actions/checkout@v3
       
-      # گام ۲: نصب Python
-      - name: 🐍 Setup Python
-        uses: actions/setup-python@v4
+      # نصب Rust
+      - name: 🦀 Setup Rust
+        uses: actions-rs/toolchain@v1
         with:
-          python-version: '3.11'
+          toolchain: stable
+          override: true
       
-      # گام ۳: پاک کردن فایل‌های قدیمی
+      # Build کردن برنامه
+      - name: 🔨 Build Rust binary
+        run: |
+          cd rust-processor  # یا هر پوشه‌ای که فایل‌های Rust در آن هستند
+          cargo build --release
+          ls -lh target/release/
+      
+      # پاک کردن قدیمی‌ها
       - name: 🧹 Clean old configs
         run: |
           rm -rf configs/
           mkdir -p configs/
       
-      # گام ۴: پردازش کانفیگ‌ها
+      # اجرای برنامه
       - name: 🚀 Process configs
         run: |
-          echo "Starting config processing..."
-          
-          # بررسی وجود فایل
-          if [ ! -f simple_processor.py ]; then
-            echo "❌ Error: simple_processor.py not found!"
-            exit 1
-          fi
-          
-          # اجرای برنامه
-          python3 simple_processor.py subscriptions.txt
+          cd rust-processor
+          ./target/release/vless-processor ../subscriptions.txt
       
-      # گام ۵: Commit و Push
+      # Commit و Push
       - name: 💾 Commit and push
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          
           git add configs/ README.md
-          
-          # بررسی اینکه آیا تغییری وجود دارد
-          if git diff --staged --quiet; then
-            echo "ℹ️  No changes to commit"
-          else
-            git commit -m "🔄 Auto-update configs - $(date '+%Y-%m-%d %H:%M:%S UTC')"
-            git push
-            echo "✅ Changes pushed successfully!"
-          fi
+          git diff --staged --quiet || (git commit -m "🔄 Auto-update - $(date '+%Y-%m-%d %H:%M:%S')" && git push)
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
