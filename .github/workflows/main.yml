@@ -27,9 +27,7 @@ jobs:
         uses: actions/setup-python@v4
         with:
           python-version: '3.11'
-          # استفاده از cache برای سرعت بیشتر
-          cache: 'pip'
-      
+         
       # مرحله 3: نصب dependencies مورد نیاز
       - name: 📦 Install dependencies
         run: |
