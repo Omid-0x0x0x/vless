@@ -8,43 +8,72 @@ on:
 jobs:
   update:
     runs-on: ubuntu-latest
-    
+
     steps:
       - name: 📥 Checkout
         uses: actions/checkout@v3
-      
-      # نصب Rust
+
       - name: 🦀 Setup Rust
         uses: actions-rs/toolchain@v1
         with:
           toolchain: stable
           override: true
-      
-      # Build کردن برنامه
-      - name: 🔨 Build Rust binary
+
+      - name: 🔎 Detect Rust project dir and build
+        shell: bash
         run: |
-          cd rust-processor  # یا هر پوشه‌ای که فایل‌های Rust در آن هستند
+          # Detect where Cargo.toml is located.
+          # Adjust detection if your project is in a different folder.
+          if [ -f "$GITHUB_WORKSPACE/Cargo.toml" ]; then
+            PROJECT_DIR="."
+          elif [ -f "$GITHUB_WORKSPACE/rust-processor/Cargo.toml" ]; then
+            PROJECT_DIR="rust-processor"
+          else
+            echo "ERROR: No Cargo.toml found in repo root or rust-processor/. Update the workflow or add Cargo.toml."
+            exit 1
+          fi
+
+          echo "Detected PROJECT_DIR=$PROJECT_DIR"
+          echo "PROJECT_DIR=$PROJECT_DIR" >> $GITHUB_ENV
+
+          # Build release binary
+          cd "$GITHUB_WORKSPACE/$PROJECT_DIR"
           cargo build --release
-          ls -lh target/release/
-      
-      # پاک کردن قدیمی‌ها
+          ls -lh target/release/ || true
+
       - name: 🧹 Clean old configs
         run: |
           rm -rf configs/
           mkdir -p configs/
-      
-      # اجرای برنامه
-      - name: 🚀 Process configs
+
+      - name: 🚀 Run processor binary
+        shell: bash
         run: |
-          cd rust-processor
-          ./target/release/vless-processor ../subscriptions.txt
-      
-      # Commit و Push
+          # Set binary name here if it differs
+          BINARY_NAME="vless-processor"
+          BINARY="$GITHUB_WORKSPACE/${PROJECT_DIR}/target/release/${BINARY_NAME}"
+
+          if [ ! -x "$BINARY" ]; then
+            echo "ERROR: Binary not found or not executable: $BINARY"
+            ls -la "$(dirname "$BINARY")" || true
+            exit 1
+          fi
+
+          # Adjust subscriptions file path if it's not at repo root
+          SUBS_FILE="$GITHUB_WORKSPACE/subscriptions.txt"
+          if [ ! -f "$SUBS_FILE" ]; then
+            echo "ERROR: subscriptions.txt not found at $SUBS_FILE"
+            exit 1
+          fi
+
+          # Run the processor (it should produce files under configs/)
+          "$BINARY" "$SUBS_FILE"
+
       - name: 💾 Commit and push
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add configs/ README.md
           git diff --staged --quiet || (git commit -m "🔄 Auto-update - $(date '+%Y-%m-%d %H:%M:%S')" && git push)
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
