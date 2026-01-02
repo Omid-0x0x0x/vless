@@ -10,24 +10,37 @@ jobs:
     runs-on: ubuntu-latest
     
     steps:
+      # گام ۱: دانلود کد از repository
       - name: 📥 Checkout
         uses: actions/checkout@v3
       
+      # گام ۲: نصب Python
       - name: 🐍 Setup Python
         uses: actions/setup-python@v4
         with:
           python-version: '3.11'
       
+      # گام ۳: پاک کردن فایل‌های قدیمی
       - name: 🧹 Clean old configs
         run: |
           rm -rf configs/
           mkdir -p configs/
       
+      # گام ۴: پردازش کانفیگ‌ها
       - name: 🚀 Process configs
         run: |
           echo "Starting config processing..."
-          python3 pingco.py subscriptions.txt
+          
+          # بررسی وجود فایل
+          if [ ! -f simple_processor.py ]; then
+            echo "❌ Error: simple_processor.py not found!"
+            exit 1
+          fi
+          
+          # اجرای برنامه
+          python3 simple_processor.py subscriptions.txt
       
+      # گام ۵: Commit و Push
       - name: 💾 Commit and push
         run: |
           git config user.name "github-actions[bot]"
@@ -35,12 +48,13 @@ jobs:
           
           git add configs/ README.md
           
+          # بررسی اینکه آیا تغییری وجود دارد
           if git diff --staged --quiet; then
-            echo "No changes to commit"
+            echo "ℹ️  No changes to commit"
           else
-            git commit -m "🔄 Auto-update configs - $(date '+%Y-%m-%d %H:%M:%S')"
+            git commit -m "🔄 Auto-update configs - $(date '+%Y-%m-%d %H:%M:%S UTC')"
             git push
-            echo "✅ Changes pushed!"
+            echo "✅ Changes pushed successfully!"
           fi
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
