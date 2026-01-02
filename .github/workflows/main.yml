@@ -1,0 +1,166 @@
+name: Auto Update VPN Configs
+
+# این workflow به صورت خودکار کانفیگ‌های VPN را دانلود، پردازش و به‌روزرسانی می‌کند
+
+on:
+  # اجرای خودکار هر 6 ساعت یکبار
+  schedule:
+    - cron: '0 */6 * * *'
+  
+  # امکان اجرای دستی از طریق GitHub UI
+  workflow_dispatch:
+
+jobs:
+  update-configs:
+    runs-on: ubuntu-latest
+    
+    steps:
+      # مرحله 1: دانلود کد از repository
+      - name: 📥 Checkout repository
+        uses: actions/checkout@v3
+        with:
+          # دانلود تمام history برای git operations
+          fetch-depth: 0
+      
+      # مرحله 2: نصب Python
+      - name: 🐍 Setup Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.11'
+          # استفاده از cache برای سرعت بیشتر
+          cache: 'pip'
+      
+      # مرحله 3: نصب dependencies مورد نیاز
+      - name: 📦 Install dependencies
+        run: |
+          echo "Installing PySocks for proxy support..."
+          pip install PySocks --break-system-packages
+          
+          echo "✅ Dependencies installed successfully"
+      
+      # مرحله 4: پاک کردن فایل‌های قدیمی
+      - name: 🧹 Clean old configs
+        run: |
+          echo "Cleaning old config files..."
+          rm -rf configs/
+          mkdir -p configs/
+          
+          echo "✅ Old configs cleaned"
+      
+      # مرحله 5: دانلود و پردازش کانفیگ‌ها
+      - name: 🚀 Fetch and process configs
+        run: |
+          echo "================================================"
+          echo "Starting config fetch and processing..."
+          echo "================================================"
+          
+          # بررسی وجود فایل subscriptions
+          if [ ! -f subscriptions.txt ]; then
+            echo "❌ Error: subscriptions.txt not found!"
+            echo "Please create this file with your subscription URLs"
+            exit 1
+          fi
+          
+          # نمایش تعداد subscription ها
+          SUBS_COUNT=$(grep -v '^#' subscriptions.txt | grep -v '^$' | wc -l)
+          echo "📊 Found $SUBS_COUNT subscription URLs"
+          
+          # اجرای pingco
+          echo ""
+          echo "Starting pingco.py..."
+          echo ""
+          
+          python3 pingco.py \
+            -sub subscriptions.txt \
+            -name configs/base \
+            -icmp \
+            -split 300
+          
+          # بررسی موفقیت
+          if [ $? -eq 0 ]; then
+            echo ""
+            echo "✅ Config processing completed successfully!"
+            
+            # نمایش آمار
+            if [ -d configs ]; then
+              FILE_COUNT=$(ls -1 configs/*.txt 2>/dev/null | wc -l)
+              echo "📁 Created $FILE_COUNT config files"
+            fi
+          else
+            echo "❌ Error in config processing!"
+            exit 1
+          fi
+        continue-on-error: false
+      
+      # مرحله 6: بررسی تغییرات
+      - name: 🔍 Check for changes
+        id: check_changes
+        run: |
+          if [ -d configs ] && [ "$(ls -A configs)" ]; then
+            echo "has_changes=true" >> $GITHUB_OUTPUT
+            echo "✅ New configs are ready to commit"
+          else
+            echo "has_changes=false" >> $GITHUB_OUTPUT
+            echo "⚠️ No new configs generated"
+          fi
+      
+      # مرحله 7: Commit و Push (فقط اگر تغییر وجود داشته باشد)
+      - name: 💾 Commit and push changes
+        if: steps.check_changes.outputs.has_changes == 'true'
+        run: |
+          # تنظیم git config
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+          
+          # اضافه کردن فایل‌ها
+          git add configs/
+          
+          # بررسی اینکه واقعاً تغییری وجود دارد
+          if git diff --staged --quiet; then
+            echo "ℹ️ No changes to commit"
+          else
+            # ساخت commit message با تاریخ و زمان
+            TIMESTAMP=$(date '+%Y-%m-%d %H:%M:%S UTC')
+            FILE_COUNT=$(ls -1 configs/*.txt | wc -l)
+            
+            git commit -m "🔄 Auto-update configs - $TIMESTAMP" \
+                       -m "📊 Generated $FILE_COUNT config files"
+            
+            # Push به GitHub
+            git push
+            
+            echo "✅ Changes pushed to GitHub successfully!"
+          fi
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      
+      # مرحله 8: نمایش خلاصه
+      - name: 📊 Summary
+        if: always()
+        run: |
+          echo ""
+          echo "================================================"
+          echo "📊 Workflow Summary"
+          echo "================================================"
+          echo "Execution time: $(date '+%Y-%m-%d %H:%M:%S')"
+          
+          if [ -d configs ]; then
+            FILE_COUNT=$(ls -1 configs/*.txt 2>/dev/null | wc -l)
+            echo "Files generated: $FILE_COUNT"
+            
+            # نمایش حجم فایل‌ها
+            TOTAL_SIZE=$(du -sh configs | cut -f1)
+            echo "Total size: $TOTAL_SIZE"
+            
+            # نمایش تعداد کانفیگ‌ها در اولین فایل
+            if [ -f configs/base1_icmp.txt ]; then
+              CONFIG_COUNT=$(wc -l < configs/base1_icmp.txt)
+              echo "Configs in first file: $CONFIG_COUNT"
+            fi
+          else
+            echo "⚠️ No configs directory found"
+          fi
+          
+          echo "================================================"
+          echo "✅ Workflow completed!"
+          echo "================================================"
