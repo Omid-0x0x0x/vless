@@ -2,78 +2,90 @@ name: Auto Update VLESS Configs (Rust)
 
 on:
   schedule:
-    - cron: '0 */6 * * *'
-  workflow_dispatch:
+    - cron: '0 */6 * * *'  # هر 6 ساعت
+  workflow_dispatch:  # اجرای دستی
 
 jobs:
   update:
     runs-on: ubuntu-latest
-
+    
     steps:
-      - name: 📥 Checkout
+      - name: 📥 Checkout repository
         uses: actions/checkout@v3
-
-      - name: 🦀 Setup Rust
+      
+      - name: 🦀 Setup Rust toolchain
         uses: actions-rs/toolchain@v1
         with:
           toolchain: stable
+          profile: minimal
           override: true
-
-      - name: 🔎 Detect Rust project dir and build
-        shell: bash
+      
+      - name: 📦 Cache cargo registry
+        uses: actions/cache@v3
+        with:
+          path: ~/.cargo/registry
+          key: ${{ runner.os }}-cargo-registry-${{ hashFiles('**/Cargo.lock') }}
+      
+      - name: 📦 Cache cargo index
+        uses: actions/cache@v3
+        with:
+          path: ~/.cargo/git
+          key: ${{ runner.os }}-cargo-git-${{ hashFiles('**/Cargo.lock') }}
+      
+      - name: 📦 Cache cargo build
+        uses: actions/cache@v3
+        with:
+          path: target
+          key: ${{ runner.os }}-cargo-build-target-${{ hashFiles('**/Cargo.lock') }}
+      
+      - name: 🔨 Build release binary
         run: |
-          # Detect where Cargo.toml is located.
-          # Adjust detection if your project is in a different folder.
-          if [ -f "$GITHUB_WORKSPACE/Cargo.toml" ]; then
-            PROJECT_DIR="."
-          elif [ -f "$GITHUB_WORKSPACE/rust-processor/Cargo.toml" ]; then
-            PROJECT_DIR="rust-processor"
-          else
-            echo "ERROR: No Cargo.toml found in repo root or rust-processor/. Update the workflow or add Cargo.toml."
-            exit 1
-          fi
-
-          echo "Detected PROJECT_DIR=$PROJECT_DIR"
-          echo "PROJECT_DIR=$PROJECT_DIR" >> $GITHUB_ENV
-
-          # Build release binary
-          cd "$GITHUB_WORKSPACE/$PROJECT_DIR"
-          cargo build --release
-          ls -lh target/release/ || true
-
+          echo "📦 Building Rust project..."
+          cargo build --release --verbose
+          echo "✅ Build completed!"
+          echo "📁 Binary location:"
+          ls -lh target/release/vless-processor
+      
       - name: 🧹 Clean old configs
         run: |
+          echo "🧹 Cleaning old configs..."
           rm -rf configs/
           mkdir -p configs/
-
-      - name: 🚀 Run processor binary
-        shell: bash
+          echo "✅ Configs directory ready"
+      
+      - name: 🚀 Run VLESS processor
         run: |
-          # Set binary name here if it differs
-          BINARY_NAME="vless-processor"
-          BINARY="$GITHUB_WORKSPACE/${PROJECT_DIR}/target/release/${BINARY_NAME}"
-
-          if [ ! -x "$BINARY" ]; then
-            echo "ERROR: Binary not found or not executable: $BINARY"
-            ls -la "$(dirname "$BINARY")" || true
-            exit 1
-          fi
-
-          # Adjust subscriptions file path if it's not at repo root
-          SUBS_FILE="$GITHUB_WORKSPACE/subscriptions.txt"
-          if [ ! -f "$SUBS_FILE" ]; then
-            echo "ERROR: subscriptions.txt not found at $SUBS_FILE"
-            exit 1
-          fi
-
-          # Run the processor (it should produce files under configs/)
-          "$BINARY" "$SUBS_FILE"
-
-      - name: 💾 Commit and push
+          echo "🚀 Running VLESS processor..."
+          ./target/release/vless-processor subscriptions.txt
+          echo "✅ Processing completed!"
+      
+      - name: 📊 Show results
+        run: |
+          echo "📊 Generated files:"
+          ls -lh configs/
+          echo ""
+          echo "📈 File contents summary:"
+          for file in configs/*.txt; do
+            if [ -f "$file" ]; then
+              lines=$(wc -l < "$file")
+              echo "  - $(basename $file): $lines configs"
+            fi
+          done
+      
+      - name: 💾 Commit and push changes
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
+          
           git add configs/ README.md
-          git diff --staged --quiet || (git commit -m "🔄 Auto-update - $(date '+%Y-%m-%d %H:%M:%S')" && git push)
+          
+          # بررسی که آیا تغییری وجود داره یا نه
+          if git diff --staged --quiet; then
+            echo "ℹ️ No changes to commit"
+          else
+            git commit -m "🔄 Auto-update configs - $(date '+%Y-%m-%d %H:%M:%S UTC')"
+            git push
+            echo "✅ Changes pushed successfully!"
+          fi
