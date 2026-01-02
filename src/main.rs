@@ -372,7 +372,7 @@ async fn main() -> Result<(), Box<dyn std::error::Error>> {
     split_configs(&unique_configs, 300, output_dir)?;
     
     // Update README
-    let repo_url = "https://github.com/Matt-Ranaei/vless"; // Change this
+    let repo_url = "https://github.com/Matt-Ranaei/vless";
     update_readme(output_dir, repo_url)?;
     
     println!("\n{}", "=".repeat(60));
