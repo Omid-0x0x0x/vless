@@ -1,4 +1,0 @@
-vless://c82f8880-bdd8-4a35-b8e7-ad5aa880f7d0@170.114.45.228:443?security=tls&type=ws&sni=v033.ylkszy.eu.org&path=/?ed=2560&encryption=none&headerType=none#%E7%BE%8E%E5%9B%BD_283
-vless://983ca061-f7ba-493a-8482-2896163b3584@DEADSEECtelegram.slimshopboyss.ir:8080?mode=auto&path=/&security=&encryption=none=/@Telegram-|-@TEHRANARGO-|-@Telegram-|-@TEHRANARGO-|-@Telegram-|-@TEHRANARGO-|-@Telegram-|-@TEHRANARGO-|-@Telegram-|-@TEHRANARGO-|-@TEHRANARGO&host=shop.slimshopboyss.ir&type=xhttp#CA_4356_@Surfboardv2ray
-vless://d342d11e-d424-4583-b36e-524ab1f0afa4@45.80.110.211:2053?security=tls&sni=a.ssll.gay&type=ws&path=twitterfreecodesfp#@Vip_Security join us - 2340
-vless://eb5897f1-b5b3-4130-9b47-128c6c781735@www.speedtest.net:80?mode=packet-up&security=none&encryption=none&host=speedtest.net&type=xhttp # [ By EbraSha ] 
