@@ -1,4 +1,4 @@
-# 🚀 VLESS Configs Repository
+# 🚀 VLESS Configs 
 
 Auto-updated every 6 hours with fresh VLESS configurations.
 
