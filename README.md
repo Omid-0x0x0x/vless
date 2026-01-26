@@ -137,10 +137,6 @@ Auto-updated every 6 hours with fresh VLESS configurations.
 
 Copy any raw link above and add it as a subscription in your V2Ray client.
 
-### Example:
-```
-https://raw.githubusercontent.com/YOUR_USERNAME/YOUR_REPO/main/configs/vless_config_1.txt
-```
 
 ## ⚙️ Transport Types
 
