@@ -1,5 +1,0 @@
-vless://af5100bf-ffe6-43de-bee5-b16cf5a3528e@my.kiomars.shop:6620?security=reality&encryption=none&pbk=RSnbrHpLJYL8AtxWie8gbcnfs68h9rHAZX-gS3EQtSM&headerType=none&fp=chrome&type=tcp&sni=play.google.com&sid=c3b6ed4da7a983c7#⚡Telegram = @prrofile_purple
-vless://ee3a4566-ce5f-4e27-b253-e981cbaf742c@cl.digifile.pw:2083?mode=gun&security=tls&encryption=none&type=grpc&serviceName=&sni=cl.digifile.pw#Join+Telegram:@Farah_VPN
-vless://c805b05e-339d-40e0-8787-432d97a27345@G10.PRODNSSPEED10.IR:2083?security=tls&alpn=h2%2Chttp%2F1.1&encryption=none&insecure=0&host=speedtest.net&fp=chrome&type=ws&allowInsecure=0 # [ By EbraSha ] 
-vless://055e3bd2-10f8-4d9c-8f7d-70b9f659e476@172.64.146.142:8443?allowInsecure=1&alpn=h3&encryption=none&host=speedtest.net&security=tls&type=ws # [ By EbraSha ] 
-vless://a2626d27-e0f8-490d-b23c-c9ca0dea4ea9@Dnss.iraniranshopdashnoard.ir:2086?path=/?ed=2080&security=none&encryption=none&host=bio.mehrsazi.ir&type=httpupgrade#4FreeIran-10710
