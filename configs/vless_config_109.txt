@@ -1,0 +1,2 @@
+vless://6a3ad064-be7c-40be-9a48-171885a359b7@mail.tomandjery.eu:1001?security=reality&allowInsecure=0&encryption=none&type=tcp&sni=play.google.com&sid=6ba85179e30d4fc2&fp=chrome&pbk=xrZlXeuTYmAC97-RbRi-aM7U67TOBMGCHVu3DovZihw&headerType=none#@chillguy_vpn
+vless://b91ec7ae-871f-3021-8433-55eaee170ec9@cloud.vpsino.com:48324?security=none&encryption=none&headerType=none&type=tcp# IR | 94.101.184.140
