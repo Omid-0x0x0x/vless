@@ -1,4 +1,0 @@
-vless://8dc7722c-2767-4eea-a28b-2f8daacc07e3@yesok42v2.ip4exordir.shop:8880?mode=gun&security=none&encryption=none&type=grpc # [ By EbraSha ] 
-vless://2928d83a-ca75-4d52-b437-fa78c7601378@172.67.70.7:443?security=tls&sni=freedom-1rj.pages.dev&type=ws&host=freedom-1rj.pages.dev&path=%2Ffreedom-1rj.pages.dev%2F%3Fed%3D2560&fp=randomized# VL-WS-TLS  NA-172.67.70.7:443
-vless://89b3cbba-e6ac-485a-9481-976a0415eab9@199.232.0.73:443?security=tls&sni=behdasht.hrtc.ir&encryption=none@ShadowsocksM73&type=ws&host=behdasht.hrtc.ir&path=/H?ed%3D2560&fp=randomized&alpn=h2,http/1.1# VL-WS-TLS  US-199.232.0.73:443
-vless://9d847ad3-1896-48f9-b89c-13fe345e2bff@104.21.48.1:443?mode=packet-up&path=%2Fgdsthjjjvfxsstyy%D8%9Fed%3D443&security=tls&alpn=h3&encryption=none&fp=chrome&type=xhttp&sni=cho.chonon.sbs#4Sarina-8762
