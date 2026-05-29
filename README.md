@@ -4,7 +4,7 @@ Auto-updated every 6 hours with fresh VLESS configurations.
 
 ## 📊 Statistics
 
-- **Total Files**: 340
+- **Total Files**: 338
 - **Last Update**: Auto-generated
 - **Update Frequency**: Every 6 hours
 
@@ -273,8 +273,6 @@ Auto-updated every 6 hours with fresh VLESS configurations.
 - [vless_config_330.txt](https://github.com/Matt-Ranaei/vless/raw/main/configs/vless_config_330.txt)
 - [vless_config_331.txt](https://github.com/Matt-Ranaei/vless/raw/main/configs/vless_config_331.txt)
 - [vless_config_332.txt](https://github.com/Matt-Ranaei/vless/raw/main/configs/vless_config_332.txt)
-- [vless_config_333.txt](https://github.com/Matt-Ranaei/vless/raw/main/configs/vless_config_333.txt)
-- [vless_config_334.txt](https://github.com/Matt-Ranaei/vless/raw/main/configs/vless_config_334.txt)
 - [vless_config_34.txt](https://github.com/Matt-Ranaei/vless/raw/main/configs/vless_config_34.txt)
 - [vless_config_35.txt](https://github.com/Matt-Ranaei/vless/raw/main/configs/vless_config_35.txt)
 - [vless_config_36.txt](https://github.com/Matt-Ranaei/vless/raw/main/configs/vless_config_36.txt)
