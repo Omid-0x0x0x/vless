@@ -1,1 +1,0 @@
-vless://05578d55-489f-475d-a321-81ec25008774@snapp.ir:80?encryption=none&type=ws&path=/&host=simorgh.garfar.ir# By EbraSha 
