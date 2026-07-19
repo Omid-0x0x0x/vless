@@ -4,7 +4,7 @@ Auto-updated every 6 hours with fresh VLESS configurations.
 
 ## 📊 Statistics
 
-- **Total Files**: 823
+- **Total Files**: 808
 - **Last Update**: Auto-generated
 - **Update Frequency**: Every 6 hours
 
@@ -795,22 +795,7 @@ Auto-updated every 6 hours with fresh VLESS configurations.
 - [vless_config_800.txt](https://github.com/Matt-Ranaei/vless/raw/main/configs/vless_config_800.txt)
 - [vless_config_801.txt](https://github.com/Matt-Ranaei/vless/raw/main/configs/vless_config_801.txt)
 - [vless_config_802.txt](https://github.com/Matt-Ranaei/vless/raw/main/configs/vless_config_802.txt)
-- [vless_config_803.txt](https://github.com/Matt-Ranaei/vless/raw/main/configs/vless_config_803.txt)
-- [vless_config_804.txt](https://github.com/Matt-Ranaei/vless/raw/main/configs/vless_config_804.txt)
-- [vless_config_805.txt](https://github.com/Matt-Ranaei/vless/raw/main/configs/vless_config_805.txt)
-- [vless_config_806.txt](https://github.com/Matt-Ranaei/vless/raw/main/configs/vless_config_806.txt)
-- [vless_config_807.txt](https://github.com/Matt-Ranaei/vless/raw/main/configs/vless_config_807.txt)
-- [vless_config_808.txt](https://github.com/Matt-Ranaei/vless/raw/main/configs/vless_config_808.txt)
-- [vless_config_809.txt](https://github.com/Matt-Ranaei/vless/raw/main/configs/vless_config_809.txt)
 - [vless_config_81.txt](https://github.com/Matt-Ranaei/vless/raw/main/configs/vless_config_81.txt)
-- [vless_config_810.txt](https://github.com/Matt-Ranaei/vless/raw/main/configs/vless_config_810.txt)
-- [vless_config_811.txt](https://github.com/Matt-Ranaei/vless/raw/main/configs/vless_config_811.txt)
-- [vless_config_812.txt](https://github.com/Matt-Ranaei/vless/raw/main/configs/vless_config_812.txt)
-- [vless_config_813.txt](https://github.com/Matt-Ranaei/vless/raw/main/configs/vless_config_813.txt)
-- [vless_config_814.txt](https://github.com/Matt-Ranaei/vless/raw/main/configs/vless_config_814.txt)
-- [vless_config_815.txt](https://github.com/Matt-Ranaei/vless/raw/main/configs/vless_config_815.txt)
-- [vless_config_816.txt](https://github.com/Matt-Ranaei/vless/raw/main/configs/vless_config_816.txt)
-- [vless_config_817.txt](https://github.com/Matt-Ranaei/vless/raw/main/configs/vless_config_817.txt)
 - [vless_config_82.txt](https://github.com/Matt-Ranaei/vless/raw/main/configs/vless_config_82.txt)
 - [vless_config_83.txt](https://github.com/Matt-Ranaei/vless/raw/main/configs/vless_config_83.txt)
 - [vless_config_84.txt](https://github.com/Matt-Ranaei/vless/raw/main/configs/vless_config_84.txt)
