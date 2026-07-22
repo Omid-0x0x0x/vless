@@ -4,7 +4,7 @@ Auto-updated every 6 hours with fresh VLESS configurations.
 
 ## 📊 Statistics
 
-- **Total Files**: 860
+- **Total Files**: 849
 - **Last Update**: Auto-generated
 - **Update Frequency**: Every 6 hours
 
@@ -840,18 +840,7 @@ Auto-updated every 6 hours with fresh VLESS configurations.
 - [vless_config_841.txt](https://github.com/Matt-Ranaei/vless/raw/main/configs/vless_config_841.txt)
 - [vless_config_842.txt](https://github.com/Matt-Ranaei/vless/raw/main/configs/vless_config_842.txt)
 - [vless_config_843.txt](https://github.com/Matt-Ranaei/vless/raw/main/configs/vless_config_843.txt)
-- [vless_config_844.txt](https://github.com/Matt-Ranaei/vless/raw/main/configs/vless_config_844.txt)
-- [vless_config_845.txt](https://github.com/Matt-Ranaei/vless/raw/main/configs/vless_config_845.txt)
-- [vless_config_846.txt](https://github.com/Matt-Ranaei/vless/raw/main/configs/vless_config_846.txt)
-- [vless_config_847.txt](https://github.com/Matt-Ranaei/vless/raw/main/configs/vless_config_847.txt)
-- [vless_config_848.txt](https://github.com/Matt-Ranaei/vless/raw/main/configs/vless_config_848.txt)
-- [vless_config_849.txt](https://github.com/Matt-Ranaei/vless/raw/main/configs/vless_config_849.txt)
 - [vless_config_85.txt](https://github.com/Matt-Ranaei/vless/raw/main/configs/vless_config_85.txt)
-- [vless_config_850.txt](https://github.com/Matt-Ranaei/vless/raw/main/configs/vless_config_850.txt)
-- [vless_config_851.txt](https://github.com/Matt-Ranaei/vless/raw/main/configs/vless_config_851.txt)
-- [vless_config_852.txt](https://github.com/Matt-Ranaei/vless/raw/main/configs/vless_config_852.txt)
-- [vless_config_853.txt](https://github.com/Matt-Ranaei/vless/raw/main/configs/vless_config_853.txt)
-- [vless_config_854.txt](https://github.com/Matt-Ranaei/vless/raw/main/configs/vless_config_854.txt)
 - [vless_config_86.txt](https://github.com/Matt-Ranaei/vless/raw/main/configs/vless_config_86.txt)
 - [vless_config_87.txt](https://github.com/Matt-Ranaei/vless/raw/main/configs/vless_config_87.txt)
 - [vless_config_88.txt](https://github.com/Matt-Ranaei/vless/raw/main/configs/vless_config_88.txt)
